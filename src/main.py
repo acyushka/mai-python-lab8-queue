@@ -1,20 +1,42 @@
-from src.power import power_function
-from src.constants import SAMPLE_CONSTANT
+from src.constants import DEFAULT_GENERATED_COUNT, DEMO_TASKS_FILEPATH
+from src.task_platform import TaskPlatform
+from src.task_sources import ApiTaskSource, FileTaskSource, GeneratorTaskSource
 
 
 def main() -> None:
     """
-    Обязательнная составляющая программ, которые сдаются. Является точкой входа в приложение
-    :return: Данная функция ничего не возвращает
+    Точка входа в программу. Создает платформу, регистрирует источники задач и собирает задачи для обработки
     """
 
-    target, degree = map(int, input("Введите два числа разделенные пробелом: ").split(" "))
+    platform = TaskPlatform()
 
-    result = power_function(target=target, power=degree)
+    generator_source = GeneratorTaskSource(
+        count=DEFAULT_GENERATED_COUNT, prefix="demo")
+    api_source = ApiTaskSource()
+    file_source = FileTaskSource(filepath=DEMO_TASKS_FILEPATH)
 
-    print(result)
+    print("\n=== Регистрация источников ===")
+    try:
+        platform.add_source(file_source)
+        platform.add_source(generator_source)
+        platform.add_source(api_source)
+        print(f"Зарегистрировано источников: {platform.source_count}")
+    except (TypeError, ValueError) as error:
+        print(f"Ошибка: {error}")
+        return
 
-    print(SAMPLE_CONSTANT)
+    print("\n=== Сбор задач ===")
+    try:
+        tasks = platform.collect_all_tasks()
+    except (FileNotFoundError, ValueError) as error:
+        print(f"Ошибка при сборе задач: {error}")
+        return
+
+    for task in tasks:
+        print(f"\n[{task.id}] payload={task.payload}")
+
+    print(f"\nВсего задач: {len(tasks)}")
+
 
 if __name__ == "__main__":
     main()

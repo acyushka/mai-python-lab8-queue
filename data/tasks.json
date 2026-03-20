@@ -1,0 +1,26 @@
+[
+  {
+    "id": "file-1",
+    "payload": {
+      "source": "file",
+      "action": "process_order",
+      "order_id": 101
+    }
+  },
+  {
+    "id": "file-2",
+    "payload": {
+      "source": "file",
+      "action": "send_notification",
+      "user_id": 42
+    }
+  },
+  {
+    "id": "file-3",
+    "payload": {
+      "source": "file",
+      "action": "recalculate_stats",
+      "period": "daily"
+    }
+  }
+]
