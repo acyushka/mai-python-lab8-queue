@@ -20,7 +20,7 @@ def main() -> None:
         platform.add_source(file_source)
         platform.add_source(generator_source)
         platform.add_source(api_source)
-        print(f"Зарегистрировано источников: {platform.source_count}")
+        print(f"\nЗарегистрировано источников: {platform.source_count}")
     except (TypeError, ValueError) as error:
         print(f"Ошибка: {error}")
         return
