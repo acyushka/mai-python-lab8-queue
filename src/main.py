@@ -33,7 +33,14 @@ def main() -> None:
         return
 
     for task in tasks:
-        print(f"\n[{task.id}] payload={task.payload}")
+        print(
+            f"\n[{task.id}] "
+            f"description={task.description!r}, "
+            f"priority={task.priority}, "
+            f"status={task.status}, "
+            f"is_ready={task.is_ready}, "
+            f"created_at={task.created_at.isoformat()}"
+        )
 
     print(f"\nВсего задач: {len(tasks)}")
 

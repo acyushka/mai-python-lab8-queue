@@ -35,9 +35,23 @@ class FileTaskSource:
         if "id" not in task.keys():
             raise ValueError(f"Task with index {index} does not contain id")
 
-        payload_value = task.get("payload", {})
-        payload = payload_value if isinstance(payload_value, dict) else {}
-        return Task(id=str(task["id"]), payload=payload)
+        description_value = task.get("description", "Untitled task")
+        if not isinstance(description_value, str) or not description_value.strip():
+            description_value = "Untitled task"
+
+        priority_value = task.get("priority", 3)
+        priority = priority_value if isinstance(priority_value, int) else 3
+
+        status_value = task.get("status", Task.STATUS_NEW)
+        status = status_value if isinstance(
+            status_value, str) else Task.STATUS_NEW
+
+        return Task(
+            id=str(task["id"]),
+            description=description_value,
+            priority=priority,
+            status=status,
+        )
 
     def __repr__(self) -> str:
         return f"FileTaskSource(filepath={self._filepath!r})"
@@ -54,8 +68,9 @@ class GeneratorTaskSource:
         return [
             Task(
                 id=f"{self._prefix}-{uuid.uuid4().hex[:8]}",
-                payload={"source": "generator",
-                         "generated": True, "position": index},
+                description=f"Generated task #{index + 1}",
+                priority=3,
+                status=Task.STATUS_NEW,
             )
             for index in range(self._count)
         ]
@@ -106,17 +121,16 @@ class ApiTaskSource:
 
     @staticmethod
     def _map_item_to_task(item: dict[str, Any]) -> Task:
-        employer_data = item.get("employer", {})
-        employer_name = None
-        if isinstance(employer_data, dict):
-            employer_name = employer_data.get("name")
+        title = item.get("name")
+        description = title if isinstance(
+            title, str) and title.strip() else "Vacancy task"
 
-        payload: dict[str, Any] = {
-            "source": "hh_api",
-            "name": item.get("name"),
-            "employer": employer_name,
-        }
-        return Task(id=f"hh-{item['id']}", payload=payload)
+        return Task(
+            id=f"hh-{item['id']}",
+            description=description,
+            priority=2,
+            status=Task.STATUS_NEW,
+        )
 
     def __repr__(self) -> str:
         return (
