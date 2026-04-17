@@ -10,7 +10,8 @@ class TaskQueue:
         self._tasks: list[Task] = list(tasks) if tasks is not None else []
 
     def __iter__(self) -> Iterator[Task]:
-        return iter(self._tasks)
+        for task in self._tasks:
+            yield task
 
     def __len__(self) -> int:
         return len(self._tasks)
