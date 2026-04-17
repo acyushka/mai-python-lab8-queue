@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 from src.task import Task
 from src.task_contracts import TaskSource
 
@@ -24,9 +26,13 @@ class TaskPlatform:
         """Собрать задачи из всех зарегистрированных источников"""
         all_tasks: list[Task] = []
         for source in self._sources:
-            tasks = source.get_tasks()
-            all_tasks.extend(tasks)
+            all_tasks.extend(source.get_tasks())
         return all_tasks
+
+    def queue_all_tasks(self) -> Generator[Task, None, None]:
+        """Лениво вернуть задачи"""
+        for source in self._sources:
+            yield from source.get_tasks()
 
     @property
     def source_count(self) -> int:

@@ -33,7 +33,7 @@ def test_file_task_source_reads_and_normalizes_items(tmp_path):
             {"id": "2", "description": "", "priority": "bad", "status": 123},
         ],
     )
-    tasks = source.get_tasks()
+    tasks = list(source.get_tasks())
 
     assert len(tasks) == 2
     assert tasks[0].id == "1"
@@ -50,13 +50,13 @@ def test_file_task_source_raises_when_id_missing(tmp_path: Path):
     source = build_file_source(tmp_path, [{"description": "xxx"}])
 
     with pytest.raises(ValueError):
-        source.get_tasks()
+        list(source.get_tasks())
 
 
 def test_generator_source_creates_tasks():
     source = GeneratorTaskSource(count=3, prefix="demo")
 
-    tasks = source.get_tasks()
+    tasks = list(source.get_tasks())
 
     assert len(tasks) == 3
     assert all(task.id.startswith("demo-") for task in tasks)
@@ -86,7 +86,7 @@ def test_api_source_returns_tasks_from_hh_payload(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(requests, "get", fake_get)
     source = ApiTaskSource()
 
-    tasks = source.get_tasks()
+    tasks = list(source.get_tasks())
 
     assert len(tasks) == 2
     assert tasks[0].id == "hh-123"
@@ -102,6 +102,6 @@ def test_api_source_returns_empty_list_on_request_error(monkeypatch: pytest.Monk
     monkeypatch.setattr(requests, "get", fake_get)
     source = ApiTaskSource()
 
-    tasks = source.get_tasks()
+    tasks = list(source.get_tasks())
 
     assert tasks == []

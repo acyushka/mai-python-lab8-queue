@@ -8,8 +8,8 @@ class SimpleTaskSource:
     def __init__(self, tasks: list[Task]):
         self._tasks = tasks
 
-    def get_tasks(self) -> list[Task]:
-        return self._tasks
+    def get_tasks(self):
+        return (task for task in self._tasks)
 
 
 class InvalidSource:
@@ -52,3 +52,16 @@ def test_platform_collects_tasks_from_all_sources():
     tasks = platform.collect_all_tasks()
 
     assert [task.id for task in tasks] == ["1", "2", "3"]
+
+
+def test_platform_queues_tasks_successfully():
+    platform = TaskPlatform()
+    source_one = SimpleTaskSource([Task(id="1"), Task(id="2")])
+    source_two = SimpleTaskSource([Task(id="3")])
+
+    platform.add_source(source_one)
+    platform.add_source(source_two)
+
+    streamed_tasks = [task.id for task in platform.queue_all_tasks()]
+
+    assert streamed_tasks == ["1", "2", "3"]

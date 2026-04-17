@@ -131,7 +131,7 @@ class Task:
         self.description = description
         self.priority = priority
         self.status = status
-        self._created_at = created_at or datetime.now(timezone.utc)
+        self._created_at = created_at or datetime.now()
 
     @property
     def created_at(self) -> datetime:

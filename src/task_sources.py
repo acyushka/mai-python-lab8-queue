@@ -1,5 +1,6 @@
 import json
 import uuid
+from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
@@ -21,14 +22,11 @@ class FileTaskSource:
     def __init__(self, filepath: str) -> None:
         self._filepath = filepath
 
-    def get_tasks(self) -> list[Task]:
+    def get_tasks(self) -> Generator[Task, None, None]:
         with Path(self._filepath).open("r", encoding="utf-8") as file:
             tasks: list[dict[str, Any]] = json.load(file)
-
-        normalized_tasks: list[Task] = []
         for i, task in enumerate(tasks):
-            normalized_tasks.append(self._normalize_item(task=task, index=i))
-        return normalized_tasks
+            yield self._normalize_item(task=task, index=i)
 
     @staticmethod
     def _normalize_item(task: dict[str, Any], index: int) -> Task:
@@ -64,16 +62,14 @@ class GeneratorTaskSource:
         self._count = count
         self._prefix = prefix
 
-    def get_tasks(self) -> list[Task]:
-        return [
-            Task(
+    def get_tasks(self) -> Generator[Task, None, None]:
+        for index in range(self._count):
+            yield Task(
                 id=f"{self._prefix}-{uuid.uuid4().hex[:8]}",
                 description=f"Generated task #{index + 1}",
                 priority=3,
                 status=Task.STATUS_NEW,
             )
-            for index in range(self._count)
-        ]
 
     def __repr__(self) -> str:
         return f"GeneratorTaskSource(count={self._count}, prefix={self._prefix!r})"
@@ -92,7 +88,7 @@ class ApiTaskSource:
         self._search_text = search_text
         self._per_page = per_page
 
-    def get_tasks(self) -> list[Task]:
+    def get_tasks(self) -> Generator[Task, None, None]:
         params: dict[str, Any] = {
             "text": self._search_text,
             "per_page": self._per_page,
@@ -105,19 +101,15 @@ class ApiTaskSource:
             data: dict[str, Any] = response.json()
         except requests.RequestException as e:
             print(f"[ApiTaskSource] Ошибка запроса к API: {e}")
-            return []
+            return
 
         raw_items = data.get("items", [])
         if not isinstance(raw_items, list):
-            return []
+            return
 
-        tasks: list[Task] = []
         for item in raw_items:
-            if not isinstance(item, dict) or "id" not in item:
-                continue
-            tasks.append(self._map_item_to_task(item))
-
-        return tasks
+            if isinstance(item, dict) and "id" in item:
+                yield self._map_item_to_task(item)
 
     @staticmethod
     def _map_item_to_task(item: dict[str, Any]) -> Task:

@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Protocol, runtime_checkable
 
 from src.task import Task
@@ -7,6 +8,6 @@ from src.task import Task
 class TaskSource(Protocol):
     """Контракт источника задач"""
 
-    def get_tasks(self) -> list[Task]:
-        """Получить список задач из источника"""
+    def get_tasks(self) -> Iterable[Task]:
+        """Получить итерируемую коллекцию задач из источника"""
         ...

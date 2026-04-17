@@ -1,5 +1,6 @@
 from src.constants import DEFAULT_GENERATED_COUNT, DEMO_TASKS_FILEPATH
 from src.task_platform import TaskPlatform
+from src.task_queue import TaskQueue
 from src.task_sources import ApiTaskSource, FileTaskSource, GeneratorTaskSource
 
 
@@ -27,12 +28,12 @@ def main() -> None:
 
     print("\n=== Сбор задач ===")
     try:
-        tasks = platform.collect_all_tasks()
+        queue = TaskQueue(platform.queue_all_tasks())
     except (FileNotFoundError, ValueError) as error:
         print(f"Ошибка при сборе задач: {error}")
         return
 
-    for task in tasks:
+    for task in queue:
         print(
             f"\n[{task.id}] "
             f"description={task.description!r}, "
@@ -42,7 +43,7 @@ def main() -> None:
             f"created_at={task.created_at.isoformat()}"
         )
 
-    print(f"\nВсего задач: {len(tasks)}")
+    print(f"\nВсего задач: {len(queue)}")
 
 
 if __name__ == "__main__":
